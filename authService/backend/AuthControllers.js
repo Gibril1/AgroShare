@@ -1,16 +1,97 @@
-function generateAlphanumericString() {
+const asyncHandler = require('express-async-handler')
+const bcrypt = require('bcryptjs')
+const User = require('./AuthModels')
+const jwt = require('jsonwebtoken')
+
+const registerUser = asyncHandler(async (req, res) => {
+    const { name, email, password } = req.body
+
+    if (!name || !email || !password) {
+        res.status(400)
+        throw new Error('Please enter all fields')
+    }
+
+    const userExists = await User.findOne({ email })
+
+    if (userExists) {
+        res.status(400)
+        throw new Error('User already exists')
+    }
+
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password, salt)
+
+    const user = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        uniqueCode: await getUniqueCode()
+    })
+
+    const { password: _, ...newUser } = user._doc
+    
+    res.status(201).json({
+        message: `Account has been created for ${name}`,
+        token: generateToken(newUser._id),
+        newUser
+    })
+})
+
+const loginUser = asyncHandler(async (req, res) => {
+    const { email, password } = req.body 
+
+    if(!email || !password){
+        res.status(400)
+        throw new Error('Please enter fields')
+    }
+
+    const user = await User.findOne({ email })
+
+    if (user && await bcrypt.compare(password, user.password)){
+        res.status(200)
+        res.json({
+            message: 'Successful Login',
+            token: generateToken(user._id)
+        })
+    }else {
+        res.status(400)
+        throw new Error('Login Failed')
+    }
+})
+
+
+const generateToken = (id) => {
+    return jwt.sign({ id }, 'process.env.JWT_SECRET', {
+        expiresIn: '30d',
+    })
+}
+
+
+
+const generateAlphanumericString = () => {
     const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let alphanumericString = '';
   
-    for (var i = 0; i < 6; i++) {
-      alphanumericString += characters.charAt(Math.floor(Math.random() * 62));
+    for (let i = 0; i < 6; i++) {
+      alphanumericString += characters.charAt(Math.floor(Math.random() * characters.length));
     }
   
-    // Shuffle the characters
-    let shuffledAlphanumericString = alphanumericString.split('').sort(function(){
-      return 0.5 - Math.random();
-    }).join('');
-  
-    return shuffledAlphanumericString;
+    return alphanumericString;
   }
   
+  const getUniqueCode = async () => {
+    let uniqueCode = generateAlphanumericString();
+  
+    const codeExists = await User.findOne({ uniqueCode });
+  
+    if (codeExists) {
+      return getUniqueCode(); // Recursive call to generate a new unique code
+    }
+  
+    return uniqueCode;
+  }
+  
+module.exports = {
+    registerUser,
+    loginUser
+  }
