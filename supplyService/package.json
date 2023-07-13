@@ -1,0 +1,13 @@
+{
+  "name": "supply-service",
+  "version": "1.0.0",
+  "description": "This services handles the routes that enables the supply of goods among users",
+  "main": "supplyservice.js",
+  "license": "MIT",
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "express": "^4.18.2",
+    "express-async-handler": "^1.2.0",
+    "mongoose": "^7.3.3"
+  }
+}
