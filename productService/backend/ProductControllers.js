@@ -10,7 +10,7 @@ const createProduct = asyncHandler(async (req, res) => {
     }
 
     const product = await Product.findOne({
-        userId: req.user.id,
+        owner: req.user.id,
         name
     })
 
@@ -23,7 +23,8 @@ const createProduct = asyncHandler(async (req, res) => {
         name,
         description,
         quantity,
-        userId: req.user.id
+        owner: req.user.id,
+        supplier: req.user.id
     })
 
     res.status(201).json({
@@ -33,7 +34,7 @@ const createProduct = asyncHandler(async (req, res) => {
 })
 const getProducts = asyncHandler(async (req, res) => {
     const products = await Product.find({
-        userId: req.user.id
+        owner: req.user.id
     })
     res.status(200).json({
         message: 'Products have been received successfully',

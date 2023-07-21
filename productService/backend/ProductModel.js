@@ -14,11 +14,17 @@ const ProductSchema = new mongoose.Schema({
         required: true,
         default: 0
     },
-    userId: {
+    owner: {
         type: mongoose.Types.ObjectId,
         required: true,
         ref: 'User'
+    },
+    supplier: {
+        type: mongoose.Types.ObjectId,
+        ref: 'User'
     }
+}, {
+    timestamps: true
 })
 
 
