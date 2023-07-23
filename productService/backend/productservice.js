@@ -1,7 +1,8 @@
 const express = require('express')
 const mongoose = require('mongoose')
 require('dotenv').config()
-const { errorHandler } = require('../../middleware/ErrorMiddleware')
+const { errorHandler } = require('./ProductUtils')
+const { consumeProductMessage } = require('./ProductQueues')
 const port = process.env.PORT || 5001
 
 // Connect DB
@@ -15,6 +16,15 @@ const connectDB = async() => {
     }
 }
 connectDB()
+
+// Call the consumer function
+consumeProductMessage()
+    .then(() => {
+        console.log('Consuming messages from the ProductQueue')
+    })
+    .catch((err) => {
+        console.log(`Cannot consume message. ${err.message}`)
+    })
 
 const app = express()
 app.use(express.urlencoded({ extended: false }))

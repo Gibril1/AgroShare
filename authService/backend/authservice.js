@@ -1,7 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 require('dotenv').config()
-const { errorHandler } = require('../../middleware/ErrorMiddleware')
+const { errorHandler } = require('./AuthUtils')
 const { consumeRequestMessage } = require('./AuthQueues')
 const port = process.env.PORT || 5000
 

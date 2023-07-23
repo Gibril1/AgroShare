@@ -8,7 +8,7 @@ const {
     deleteProduct
 } = require('./ProductControllers')
 
-const { protect } = require('../../middleware/AuthMiddleware')
+const { protect } = require('./ProductUtils')
 
 productRouter.route('/')
     .post(protect, createProduct)

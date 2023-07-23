@@ -1,7 +1,8 @@
 const express = require('express')
 const mongoose = require('mongoose')
 require('dotenv').config()
-const { errorHandler } = require('../../middleware/ErrorMiddleware')
+const { errorHandler } = require('./SupplyUtils')
+const { consumeSupplyQueue } = require('./SupplyQueues')
 const port = process.env.PORT || 5002
 
 // Connect DB
@@ -15,6 +16,10 @@ const connectDB = async() => {
     }
 }
 connectDB()
+
+
+
+
 
 const app = express()
 app.use(express.urlencoded({ extended: false }))
