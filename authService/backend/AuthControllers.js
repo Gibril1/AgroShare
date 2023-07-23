@@ -1,7 +1,8 @@
 const asyncHandler = require('express-async-handler')
 const bcrypt = require('bcryptjs')
-const User = require('./AuthModels')
 const jwt = require('jsonwebtoken')
+const User = require('./AuthModels')
+
 
 const registerUser = asyncHandler(async (req, res) => {
     const { name, email, password } = req.body
@@ -38,30 +39,35 @@ const registerUser = asyncHandler(async (req, res) => {
 })
 
 const loginUser = asyncHandler(async (req, res) => {
-    const { email, password } = req.body 
+    try {
+        const { email, password } = req.body 
 
-    if(!email || !password){
-        res.status(400)
-        throw new Error('Please enter fields')
-    }
+        if(!email || !password){
+            res.status(400)
+            throw new Error('Please enter fields')
+        }
 
-    const user = await User.findOne({ email })
+        const user = await User.findOne({ email })
 
-    if (user && await bcrypt.compare(password, user.password)){
-        res.status(200)
-        res.json({
-            message: 'Successful Login',
-            token: generateToken(user._id)
-        })
-    }else {
-        res.status(400)
-        throw new Error('Login Failed')
+        if (user && await bcrypt.compare(password, user.password)){
+            res.status(200)
+            res.json({
+                message: 'Successful Login',
+                token: generateToken(user._id)
+            })
+        }else {
+            res.status(400)
+            throw new Error('Invalid email or password')
+        }
+    } catch (error) {
+        res.status(500)
+        throw new Error(error.message)
     }
 })
 
 
 const generateToken = (id) => {
-    return jwt.sign({ id }, 'process.env.JWT_SECRET', {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: '30d',
     })
 }
@@ -69,7 +75,7 @@ const generateToken = (id) => {
 
 
 const generateAlphanumericString = () => {
-    const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let alphanumericString = '';
   
     for (let i = 0; i < 6; i++) {

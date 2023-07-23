@@ -2,6 +2,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 require('dotenv').config()
 const { errorHandler } = require('../../middleware/ErrorMiddleware')
+const { consumeRequestMessage } = require('./AuthQueues')
 const port = process.env.PORT || 5000
 
 // Connect DB
@@ -16,7 +17,19 @@ const connectDB = async() => {
 }
 connectDB()
 
+// Call the consumer function
+consumeRequestMessage()
+    .then(() => {
+        console.log('Consuming messages from the checkIfUserExistsQueue')
+    })
+    .catch((err) => {
+        console.log(`Cannot consume message. ${err.message}`)
+    })
+
+// Init app
 const app = express()
+
+
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 
